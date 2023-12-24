@@ -23,16 +23,17 @@ struct coord {
     float x;
     float y;
 };
+
 struct spawn_point {
     coord location;
     Direction initial_direction;
 };
 
 std::vector<spawn_point> spawn_points = {
-    {{395 + 15, 600.0f}, Direction::Up},    // Bottom, goes up
-    {{395 - 15, 0.0f}, Direction::Down},   // Top, goes down
-    {{0.0f, 295 + 15}, Direction::Right},  // Left, goes right
-    {{800.0f, 295 - 15}, Direction::Left}   // Right, goes left
+    {{395 + 15, 600.0f}, Direction::Up},    
+    {{395 - 15, 0.0f}, Direction::Down},  
+    {{0.0f, 295 + 15}, Direction::Right}, 
+    {{800.0f, 295 - 15}, Direction::Left}
 };
 
 class Vehicle {
@@ -50,13 +51,9 @@ public:
     Vehicle(float init_speed, float init_acc, float init_top_speed, coord init_pos, Direction init_dir, sf::Color color);
 
     // Setters
-    void set_acceleration(float acceleration); // Changed parameter type to float
-    void set_direction(Direction direction); // Changed parameter type for clarity
+    void set_acceleration(float acceleration);
     void set_speed(float i);
     void set_position(float x, float y);
-    // Movement methods
-    void move_car();
-    float calculate_speed();
 
     // Getters
     float get_speed() const;
@@ -64,6 +61,9 @@ public:
     coord get_position() const;
     Direction get_direction();
     const sf::CircleShape& get_shape() const;
+
+    // Movement methods
+    float calculate_speed();
 
     // Additional methods
     void update();
