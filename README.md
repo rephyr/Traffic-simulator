@@ -23,8 +23,3 @@ After running the simulation, a window will display the traffic simulation. Vehi
 
 ## Acknowledgements
 - SFML Library: [SFML Website](https://www.sfml-dev.org/)
-- [Any other acknowledgements or credits]
-
-
-## Acknowledgements
-- SFML Library: [SFML Website](https://www.sfml-dev.org/)
