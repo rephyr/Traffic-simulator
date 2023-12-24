@@ -1,6 +1,20 @@
 // Vehicle.cpp
 #include "vehicle.hh"
 
+std::map<Direction, std::string> directions = {
+    {Direction::Up, "up"},
+    {Direction::Down, "down"},
+    {Direction::Left, "left"},
+    {Direction::Right, "right"}
+};
+
+std::vector<spawn_point> spawn_points = {
+    {{395 + 15, 600.0f}, Direction::Up},    
+    {{395 - 15, 0.0f}, Direction::Down},  
+    {{0.0f, 295 + 15}, Direction::Right}, 
+    {{800.0f, 295 - 15}, Direction::Left}
+};
+
 Vehicle::Vehicle(float init_speed, float init_acc, const float init_top_speed, coord init_pos, Direction init_dir, sf::Color color)
     : speed(init_speed), acceleration(init_acc), top_speed(init_top_speed), position(init_pos), direction(init_dir)
 {

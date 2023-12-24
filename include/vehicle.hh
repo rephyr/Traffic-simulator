@@ -5,18 +5,17 @@
 #include <SFML/Graphics.hpp>
 #include <cstdlib>
 #include <ctime>
+struct spawn_point;
+enum class Direction;
+
+extern std::vector<spawn_point> spawn_points;
+extern std::map<Direction, std::string> directions;
+
 enum class Direction {
     Up,
     Down,
     Left,
     Right
-};
-
-std::map<Direction, std::string> directionNames = {
-    {Direction::Up, "up"},
-    {Direction::Down, "down"},
-    {Direction::Left, "left"},
-    {Direction::Right, "right"}
 };
 
 struct coord {
@@ -27,13 +26,6 @@ struct coord {
 struct spawn_point {
     coord location;
     Direction initial_direction;
-};
-
-std::vector<spawn_point> spawn_points = {
-    {{395 + 15, 600.0f}, Direction::Up},    
-    {{395 - 15, 0.0f}, Direction::Down},  
-    {{0.0f, 295 + 15}, Direction::Right}, 
-    {{800.0f, 295 - 15}, Direction::Left}
 };
 
 class Vehicle {

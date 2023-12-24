@@ -1,6 +1,5 @@
 #include <SFML/Graphics.hpp>
 #include "vehicle.hh"
-#include "vehicle.cpp"
 #include <vector>
 
 int main() {
@@ -25,11 +24,9 @@ int main() {
             if (event.type == sf::Event::Closed)
                 window.close();
         }
-        // Draw roads
-        window.draw(vertical_road);
-        window.draw(horizontal_road);
 
-        if (clock.getElapsedTime().asSeconds() >= 2.0f) {
+
+        if (clock.getElapsedTime().asSeconds() >= 0.5f) {
             // Set colors for different spawns
             sf::Color bottom_spawn_color = sf::Color::Red;
             sf::Color top_spawn_color = sf::Color::Blue;
@@ -70,6 +67,9 @@ int main() {
 
         window.clear(sf::Color::White);
 
+        // Draw roads
+        window.draw(vertical_road);
+        window.draw(horizontal_road);
         // Draw vehicles
         for (const auto& vehicle : vehicles) {
             window.draw(vehicle.get_shape());
