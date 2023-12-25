@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "vehicle.hh"
+#include "simulation_utils.hh"
 #include <vector>
 
 int main() {
@@ -60,8 +61,39 @@ int main() {
             clock.restart();
         }
 
+        // FIXME: Implement more efficient collision logic
+
+        // Collision logic
+        // Reset collision status for all vehicles
+                for (auto& vehicle : vehicles) {
+            vehicle.set_in_collision(false);
+        }
+
+        // Check for collisions and update collision status
+        for (int i = 0; i < vehicles.size(); i++) {
+            for (int j = 0; j < vehicles.size(); j++) {
+                if (i != j) {
+                    if (vehicles[i].get_red_zone().getGlobalBounds().intersects(vehicles[j].get_shape().getGlobalBounds())) {
+                        if (should_avoid(vehicles[i], vehicles[j])) {
+                            vehicles[i].set_in_collision(true);
+                            vehicles[i].stop_car();
+                            break;
+                        }
+                    } else if (vehicles[i].get_yellow_zone().getGlobalBounds().intersects(vehicles[j].get_shape().getGlobalBounds())) {
+                        if (should_avoid(vehicles[i], vehicles[j])) {
+                            vehicles[i].set_in_collision(true);
+                            vehicles[i].slow_down(); // Slow down if in yellow zone
+                        }
+                    }
+                }
+            }
+        }
+
         // Update vehicle positions
         for (auto& vehicle : vehicles) {
+            if (!vehicle.get_collision_status()) {
+                vehicle.resume(); // Resume normal behavior if not in collision
+            }
             vehicle.update();
         }
 
@@ -71,9 +103,11 @@ int main() {
         window.draw(vertical_road);
         window.draw(horizontal_road);
         // Draw vehicles
-        for (const auto& vehicle : vehicles) {
-            window.draw(vehicle.get_shape());
-        }
+    for (const auto& vehicle : vehicles) {
+        window.draw(vehicle.get_yellow_zone());
+        window.draw(vehicle.get_red_zone());
+        window.draw(vehicle.get_shape());
+    }
 
         window.display();
     }

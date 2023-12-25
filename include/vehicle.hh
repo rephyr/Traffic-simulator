@@ -30,13 +30,23 @@ struct spawn_point {
 
 class Vehicle {
 private:
+    // Speed data
     float speed;
     float acceleration;  
     const float top_speed;
+    float min_speed = 0.05f;
+
+    // Position data
     coord position;
     Direction direction;
     coord target_position;
 
+    // For vehicle avoidance
+    sf::CircleShape yellow_zone;
+    sf::CircleShape red_zone;
+    bool in_collision;
+
+    // Vehicle shape
     sf::CircleShape shape;
 public:
     // Constructor
@@ -44,20 +54,28 @@ public:
 
     // Setters
     void set_acceleration(float acceleration);
-    void set_speed(float i);
+    void set_speed(float new_speed);
     void set_position(float x, float y);
+    void set_in_collision(bool state);
 
     // Getters
     float get_speed() const;
     coord get_target_pos() const;
     coord get_position() const;
-    Direction get_direction();
+    Direction get_direction() const;
     const sf::CircleShape& get_shape() const;
+    sf::FloatRect get_expanded_bounding_box() const;
+    bool get_collision_status();
+    const sf::CircleShape& get_yellow_zone() const;
+    const sf::CircleShape& get_red_zone() const;
 
     // Movement methods
     float calculate_speed();
-
+    void slow_down();
+    void stop_car();
     // Additional methods
+    void avoid();
+    void resume();
     void update();
 };
 #endif // VEHICLE_HH
