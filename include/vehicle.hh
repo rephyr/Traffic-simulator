@@ -33,7 +33,7 @@ private:
     // Speed data
     float speed;
     float acceleration;  
-    const float top_speed;
+    float top_speed;
     float min_speed = 0.05f;
 
     // Position data

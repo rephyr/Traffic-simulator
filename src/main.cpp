@@ -2,9 +2,28 @@
 #include "vehicle.hh"
 #include "simulation_utils.hh"
 #include <vector>
+#include <algorithm>
+#include <memory>
+
+int SCREEN_WIDTH = 800;
+int SCREEN_HEIGHT = 600;
+
+bool is_outside_screen(const std::unique_ptr<Vehicle>& vehicle) {
+    coord position = vehicle->get_position();
+    return position.x < 0 || position.x > SCREEN_WIDTH || position.y < 0 || position.y > SCREEN_HEIGHT;
+}
+
+void remove_vehicle_outside_screen(std::vector<std::unique_ptr<Vehicle>>& vehicles) {
+    vehicles.erase(
+        std::remove_if(vehicles.begin(), vehicles.end(), 
+                       [](const std::unique_ptr<Vehicle>& v) { return is_outside_screen(v); }),
+        vehicles.end()
+    );
+}
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Vehicle Simulation");
+
+    sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Vehicle Simulation");
 
     // Create roads
     sf::RectangleShape vertical_road(sf::Vector2f(60, 600)); // Width of 60, height of 600
@@ -17,7 +36,7 @@ int main() {
     sf::Clock clock;
 
     // Keep track of all the vehicles
-    std::vector<Vehicle> vehicles;
+    std::vector<std::unique_ptr<Vehicle>> vehicles;
 
     while (window.isOpen()) {
         sf::Event event;
@@ -27,7 +46,7 @@ int main() {
         }
 
 
-        if (clock.getElapsedTime().asSeconds() >= 0.5f) {
+        if (clock.getElapsedTime().asSeconds() >= 0.2f) {
             // Set colors for different spawns
             sf::Color bottom_spawn_color = sf::Color::Red;
             sf::Color top_spawn_color = sf::Color::Blue;
@@ -54,9 +73,8 @@ int main() {
                     break;
             }
             // Create new vehicle
-            Vehicle new_vehicle(0.01f, 0.05f, 0.1f, 
-                selected_spawn_point.location, selected_spawn_point.initial_direction, spawn_color);
-            vehicles.push_back(new_vehicle);
+            vehicles.push_back(std::make_unique<Vehicle>(0.01f, 0.05f, 0.1f, 
+                selected_spawn_point.location, selected_spawn_point.initial_direction, spawn_color));
 
             clock.restart();
         }
@@ -65,24 +83,24 @@ int main() {
 
         // Collision logic
         // Reset collision status for all vehicles
-                for (auto& vehicle : vehicles) {
-            vehicle.set_in_collision(false);
+        for (auto& vehicle : vehicles) {
+            vehicle->set_in_collision(false);
         }
 
         // Check for collisions and update collision status
-        for (int i = 0; i < vehicles.size(); i++) {
-            for (int j = 0; j < vehicles.size(); j++) {
+        for (size_t i = 0; i < vehicles.size(); i++) {
+            for (size_t j = 0; j < vehicles.size(); j++) {
                 if (i != j) {
-                    if (vehicles[i].get_red_zone().getGlobalBounds().intersects(vehicles[j].get_shape().getGlobalBounds())) {
-                        if (should_avoid(vehicles[i], vehicles[j])) {
-                            vehicles[i].set_in_collision(true);
-                            vehicles[i].stop_car();
+                    if (vehicles[i]->get_red_zone().getGlobalBounds().intersects(vehicles[j]->get_shape().getGlobalBounds())) {
+                        if (should_avoid(*vehicles[i], *vehicles[j])) {
+                            vehicles[i]->set_in_collision(true);
+                            vehicles[i]->stop_car();
                             break;
                         }
-                    } else if (vehicles[i].get_yellow_zone().getGlobalBounds().intersects(vehicles[j].get_shape().getGlobalBounds())) {
-                        if (should_avoid(vehicles[i], vehicles[j])) {
-                            vehicles[i].set_in_collision(true);
-                            vehicles[i].slow_down(); // Slow down if in yellow zone
+                    } else if (vehicles[i]->get_yellow_zone().getGlobalBounds().intersects(vehicles[j]->get_shape().getGlobalBounds())) {
+                        if (should_avoid(*vehicles[i], *vehicles[j])) {
+                            vehicles[i]->set_in_collision(true);
+                            vehicles[i]->slow_down(); // Slow down if in yellow zone
                         }
                     }
                 }
@@ -91,25 +109,29 @@ int main() {
 
         // Update vehicle positions
         for (auto& vehicle : vehicles) {
-            if (!vehicle.get_collision_status()) {
-                vehicle.resume(); // Resume normal behavior if not in collision
-            }
-            vehicle.update();
+                if (!vehicle->get_collision_status()) {
+                    vehicle->resume(); // Resume normal behavior if not in collision
+                }
+                vehicle->update();
         }
+
+        remove_vehicle_outside_screen(vehicles);
 
         window.clear(sf::Color::White);
 
         // Draw roads
         window.draw(vertical_road);
         window.draw(horizontal_road);
-        // Draw vehicles
-    for (const auto& vehicle : vehicles) {
-        window.draw(vehicle.get_yellow_zone());
-        window.draw(vehicle.get_red_zone());
-        window.draw(vehicle.get_shape());
-    }
 
-        window.display();
+        // Draw vehicles
+        for (const auto& vehicle : vehicles) {
+            window.draw(vehicle->get_yellow_zone());
+            window.draw(vehicle->get_red_zone());
+            window.draw(vehicle->get_shape());
+        }
+
+    window.display();
     }
+    
     return 0;
 }
