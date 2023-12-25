@@ -27,42 +27,60 @@ Vehicle::Vehicle(float init_speed, float init_acc, float init_top_speed, coord i
 
     // TODO: adjust these
     // Initialize yellow zone
-    float yellow_zone_radius = 31.0f; // Example value
+    float yellow_zone_radius = 30.0f; // Example value
     yellow_zone.setRadius(yellow_zone_radius);
     yellow_zone.setFillColor(sf::Color(255, 255, 0, 100)); // Semi-transparent yellow
     yellow_zone.setOrigin(yellow_zone_radius, yellow_zone_radius); // Set origin to the center
     yellow_zone.setPosition(position.x, position.y);
     // Initialize red zone
-    float red_zone_radius = 16.0f; // Example value
+    float red_zone_radius = 13.0f; // Example value
     red_zone.setRadius(red_zone_radius);
     red_zone.setFillColor(sf::Color(255, 0, 0, 100)); // Semi-transparent red
     red_zone.setOrigin(red_zone_radius, red_zone_radius); // Set origin to the center
     red_zone.setPosition(position.x, position.y);
 }
 
-
-void Vehicle::update(){
+void Vehicle::update() {
     Direction cur_dir = get_direction();
     coord cur_pos = get_position();
     float cur_speed = get_speed();
 
-    if(!in_collision){    
+    if (!in_collision) {
         cur_speed = calculate_speed();
     }
 
+    // Update vehicle position based on direction
     if (cur_dir == Direction::Up) {
-        set_position(cur_pos.x, cur_pos.y - cur_speed); 
+        set_position(cur_pos.x, cur_pos.y - cur_speed);
     } else if (cur_dir == Direction::Down) {
-        set_position(cur_pos.x, cur_pos.y + cur_speed); 
+        set_position(cur_pos.x, cur_pos.y + cur_speed);
     } else if (cur_dir == Direction::Left) {
-        set_position(cur_pos.x - cur_speed, cur_pos.y); 
+        set_position(cur_pos.x - cur_speed, cur_pos.y);
     } else if (cur_dir == Direction::Right) {
-        set_position(cur_pos.x + cur_speed, cur_pos.y); 
+        set_position(cur_pos.x + cur_speed, cur_pos.y);
     }
+
+    // Update the position of the zones
     yellow_zone.setPosition(position.x, position.y);
     red_zone.setPosition(position.x, position.y);
-}
 
+    // Additional logic based on intersection state
+    switch (intersectionState) {
+        case IntersectionState::ApproachingIntersection:
+            // Logic for when the vehicle is approaching the intersection
+            break;
+        case IntersectionState::InIntersection:
+            // Logic for when the vehicle is in the intersection
+            break;
+        case IntersectionState::ExitingIntersection:
+            // Logic for when the vehicle is exiting the intersection
+            resume(); // Resume normal speed after exiting the intersection
+            break;
+        default:
+            // No special logic for other states
+            break;
+    }
+}
 void Vehicle::avoid(){
 
 }
@@ -98,6 +116,7 @@ coord Vehicle::get_position() const{
 Direction Vehicle::get_direction() const{
     return direction;
 }
+
 sf::FloatRect Vehicle::get_expanded_bounding_box() const {
     sf::FloatRect original_bounds = shape.getGlobalBounds();
     float expansion_factor = 1.5;
@@ -135,7 +154,7 @@ const sf::CircleShape& Vehicle::get_red_zone() const {
 
 void Vehicle::slow_down() {
     // Reduce speed, but don't stop completely
-    speed = std::max(speed * 0.5f, min_speed);
+    speed = std::max(speed/1.5f, min_speed);
 }
 
 void Vehicle::resume() {
@@ -145,4 +164,12 @@ void Vehicle::resume() {
 
 void Vehicle::stop_car(){
     speed = 0.0f;
+}
+
+void Vehicle::set_intersection_state(IntersectionState state) {
+    intersectionState = state;
+}
+
+IntersectionState Vehicle::get_intersection_state() const {
+    return intersectionState;
 }
